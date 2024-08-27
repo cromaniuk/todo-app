@@ -3,11 +3,12 @@ from website import create_app, db
 from website.models import Task, User
 from werkzeug.security import generate_password_hash
 
+
 @pytest.fixture(scope="session")
 def app():
     test_config = {
         "SQLALCHEMY_DATABASE_URI": "sqlite:///test.db",
-        "JWT_SECRET_KEY":"test_secret_key"
+        "JWT_SECRET_KEY": "test_secret_key",
     }
     app = create_app(test_config)
 
@@ -26,14 +27,21 @@ def runner(app):
 
 @pytest.fixture()
 def client(app):
-   test_user = User(username="test_user_1", password=generate_password_hash("testing1"))
-   test_task = Task(title="test title", description="test description", completed=True, user_id=test_user.id)
-   db.session.add(test_user)
-   db.session.add(test_task)
-   db.session.commit()
-   yield app.test_client()
-   with app.app_context():
-    clear_data(db.session)
+    test_user = User(
+        username="test_user_1", password=generate_password_hash("testing1")
+    )
+    test_task = Task(
+        title="test title",
+        description="test description",
+        completed=True,
+        user_id=test_user.id,
+    )
+    db.session.add(test_user)
+    db.session.add(test_task)
+    db.session.commit()
+    yield app.test_client()
+    with app.app_context():
+        clear_data(db.session)
 
 
 def clear_data(session):
@@ -69,13 +77,17 @@ def test_task():
 
 @pytest.fixture(scope="module")
 def updated_task():
-    test_task = Task(title="test title updated", description="test description updated", completed=False)
+    test_task = Task(
+        title="test title updated",
+        description="test description updated",
+        completed=False,
+    )
     yield test_task
 
 
 @pytest.fixture(scope="module")
 def new_task():
-    test_task = Task(title="new test title", description="new test description", completed=False)
+    test_task = Task(
+        title="new test title", description="new test description", completed=False
+    )
     yield test_task
-
-
