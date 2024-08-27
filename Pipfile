@@ -1,0 +1,18 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+flask = "*"
+flask-sqlalchemy = "*"
+flask-jwt-extended = "*"
+marshmallow-sqlalchemy = "*"
+
+[dev-packages]
+python-dotenv = "*"
+pytest = "*"
+pytest-flask-sqlalchemy = "*"
+
+[requires]
+python_version = "3.12"
