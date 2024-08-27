@@ -14,7 +14,6 @@ def create_app(app_config=False):
     else:
         app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
         app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
-        app.config['DB_NAME'] = 'database.db'
     app.app_context().push()
     db.init_app(app)
     jwt.init_app(app)
