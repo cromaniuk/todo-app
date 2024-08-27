@@ -12,9 +12,13 @@ git clone <repo-url>
 install pipenv
 ```
 
-Rename .env.template to .env
+Rename `.env.template` to `.env`
 
-Create a secret key and update the JWT_SECRET_KEY in .env to the created value
+Create a secret key and update the `JWT_SECRET_KEY` in `.env` to the created value
+
+```bash
+JWT_SECRET_KEY=<secret_key>
+```
 
 ## Running The App
 
