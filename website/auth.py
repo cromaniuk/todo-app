@@ -1,27 +1,21 @@
 from flask import Blueprint, request, jsonify
 from . import db
 from .models import User
+from .schemas import UserSchema
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token, create_refresh_token
+from marshmallow import ValidationError
 
 auth = Blueprint("auth", __name__)
 
 
 @auth.post("/register")
 def register_user():
-    if "username" not in request.json:
-        return (
-            jsonify({"error": "Missing username value"}),
-            403,
-            {"Content-Type": "application/json"},
-        )
-
-    if "password" not in request.json:
-        return (
-            jsonify({"error": "Missing password value"}),
-            403,
-            {"Content-Type": "application/json"},
-        )
+    schema = UserSchema()
+    try:
+        schema.load(request.json)
+    except ValidationError as err:
+        return jsonify(err.messages), 400
 
     username = request.json["username"]
     password = request.json["password"]
@@ -53,22 +47,14 @@ def register_user():
 
 @auth.post("/login")
 def login_user():
-    if "username" not in request.json:
-        return (
-            jsonify({"error": "Missing username value"}),
-            403,
-            {"Content-Type": "application/json"},
-        )
+    schema = UserSchema()
+    try:
+        result = schema.load(request.json)
+    except ValidationError as err:
+        return jsonify(err.messages), 400
 
-    if "password" not in request.json:
-        return (
-            jsonify({"error": "Missing password value"}),
-            403,
-            {"Content-Type": "application/json"},
-        )
-
-    username = request.json["username"]
-    password = request.json["password"]
+    username = result["username"]
+    password = result["password"]
 
     user = User.query.filter_by(username=username).first()
 

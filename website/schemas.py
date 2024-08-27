@@ -8,6 +8,7 @@ class UserSchema(SQLAlchemySchema):
 
     id = auto_field()
     username = auto_field()
+    password = auto_field()
 
 
 class TaskSchema(SQLAlchemySchema):

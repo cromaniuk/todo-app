@@ -4,22 +4,21 @@ from . import db
 from .models import Task
 from .models import User
 from .schemas import TaskSchema
-
+from marshmallow import ValidationError
 tasks = Blueprint("tasks", __name__)
 
 
 @tasks.post("/tasks")
 @jwt_required()
 def add_task():
-    if "title" not in request.json:
-        return jsonify({"error": "Missing title value"}), 403
-    if "description" not in request.json:
-        return jsonify({"error": "Missing description value"}), 403
-    if "completed" not in request.json:
-        return jsonify({"error": "Missing completed value"}), 403
-    title = request.json["title"]
-    description = request.json["description"]
-    completed = request.json["completed"]
+    schema = TaskSchema()
+    try:
+        result = schema.load(request.json)
+    except ValidationError as err:
+        return jsonify(err.messages), 400
+    title = result["title"]
+    description = result["description"]
+    completed = result["completed"]
     user = User.query.filter_by(username=get_jwt_identity()).first()
     new_task = Task(
         title=title, description=description, completed=completed, user_id=user.id
@@ -27,7 +26,7 @@ def add_task():
     db.session.add(new_task)
     db.session.commit()
 
-    return TaskSchema().dumps(new_task), 201, {"Content-Type": "application/json"}
+    return schema.dumps(new_task), 201, {"Content-Type": "application/json"}
 
 
 @tasks.get("/tasks")
@@ -40,33 +39,20 @@ def get_tasks():
 @tasks.put("/tasks/<int:task_id>")
 @jwt_required()
 def update_task(task_id):
+    schema = TaskSchema()
     existing_task = db.session.get(Task, task_id)
     if existing_task:
-        if "title" not in request.json:
-            return (
-                jsonify({"error": "Missing title value"}),
-                403,
-                {"Content-Type": "application/json"},
-            )
-        if "description" not in request.json:
-            return (
-                jsonify({"error": "Missing description value"}),
-                403,
-                {"Content-Type": "application/json"},
-            )
-        if "completed" not in request.json:
-            return (
-                jsonify({"error": "Missing completed value"}),
-                403,
-                {"Content-Type": "application/json"},
-            )
+        try:
+            result = schema.load(request.json)
+        except ValidationError as err:
+            return jsonify(err.messages), 400
         task = Task.query.filter_by(id=task_id).first()
-        task.title = request.json["title"]
-        task.description = request.json["description"]
-        task.completed = request.json["completed"]
+        task.title = result["title"]
+        task.description = result["description"]
+        task.completed = result["completed"]
         db.session.add(task)
         db.session.commit()
-        return TaskSchema().dumps(task), 201, {"Content-Type": "application/json"}
+        return schema.dumps(task), 201, {"Content-Type": "application/json"}
     else:
         return (
             jsonify({"error": f"Task with ID {task_id} not found"}),
