@@ -17,8 +17,8 @@ def test_login_missing_username(client, test_user):
     response = client.post(
         "/login", headers={"Content-Type": "application/json"}, data=payload
     )
-    assert response.status_code == 403
-    assert response.json["error"] == "Missing username value"
+    assert response.status_code == 400
+    assert response.json["username"][0] == "Missing data for required field."
 
 
 def test_login_missing_password(client, test_user):
@@ -26,8 +26,9 @@ def test_login_missing_password(client, test_user):
     response = client.post(
         "/login", headers={"Content-Type": "application/json"}, data=payload
     )
-    assert response.status_code == 403
-    assert response.json["error"] == "Missing password value"
+    print(response.json)
+    assert response.status_code == 400
+    assert response.json["password"][0] == "Missing data for required field."
 
 
 def test_login_invalid_user(client, invalid_user):
